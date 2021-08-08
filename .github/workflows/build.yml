@@ -21,7 +21,7 @@ jobs:
       - name: Configure and make
         run: |
           ./autogen.sh
-          ./configure
+          ./configure --disable-shared
           make
 
       - name: Rename build output
@@ -47,7 +47,7 @@ jobs:
       - name: Configure and make
         run: |
           ./autogen.sh
-          ./configure --host=aarch64-linux-android
+          ./configure --host=aarch64-linux-android --disable-shared
           make
         env:
           AR: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
