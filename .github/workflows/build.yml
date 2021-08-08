@@ -1,0 +1,85 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-macos:
+    runs-on: macos-10.15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Configure and make
+        run: |
+          ./autogen.sh
+          ./configure
+          make
+
+      - name: Rename build output
+        run: mv .libs/libopus.a ./libopus-macos10.a
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output-macos10
+          path: |
+            include
+            libopus-macos10.a
+            COPYING
+
+  build-android:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Configure and make
+        run: |
+          ./autogen.sh
+          ./configure --host=aarch64-linux-android
+          make
+        env:
+          AR: ${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
+          RANLIB: ${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ranlib
+          LD: ${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang
+          CC: ${{ env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang
+
+      - name: Rename build output
+        run: mv .libs/libopus.a ./libopus-android30.a
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-output-android30
+          path: libopus-android30.a
+
+  create-release:
+    runs-on: ubuntu-20.04
+    needs: [build-macos, build-android]
+    steps:
+      - name: Get build output macos10
+        uses: actions/download-artifact@v2
+        with:
+          name: build-output-macos10
+
+      - name: Get build output android30
+        uses: actions/download-artifact@v2
+        with:
+          name: build-output-android30
+
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            libopus-macos10.a
+            libopus-android30.a
+            COPYING
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
