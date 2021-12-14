@@ -24,15 +24,20 @@ jobs:
           ./configure --disable-shared
           make
 
-      - name: Rename build output
-        run: mv .libs/libopus.a ./libopus-macos10.a
+      - name: Prepare output
+        run: |
+          pushd include
+          zip -r ../include.zip .
+          popd
+          mv .libs/libopus.a ./libopus-macos10.a
+          mv LICENSE_PLEASE_READ.txt LICENSE
 
       - name: Upload build output
         uses: actions/upload-artifact@v2
         with:
           name: build-output-macos10
           path: |
-            include
+            include.zip
             libopus-macos10.a
             COPYING
 
@@ -82,6 +87,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
+            include.zip
             libopus-macos10.a
             libopus-android30.a
             COPYING
