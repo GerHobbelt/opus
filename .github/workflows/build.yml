@@ -39,7 +39,7 @@ jobs:
           path: |
             include.zip
             libopus-macos10.a
-            COPYING
+            LICENSE
 
   build-android:
     runs-on: ubuntu-20.04
