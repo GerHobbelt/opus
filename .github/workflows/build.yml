@@ -30,7 +30,7 @@ jobs:
           zip -r ../include.zip .
           popd
           mv .libs/libopus.a ./libopus-macos10.a
-          mv LICENSE_PLEASE_READ.txt LICENSE
+          mv COPYING LICENSE
 
       - name: Upload build output
         uses: actions/upload-artifact@v2
@@ -90,6 +90,6 @@ jobs:
             include.zip
             libopus-macos10.a
             libopus-android30.a
-            COPYING
+            LICENSE
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
