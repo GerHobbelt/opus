@@ -84,7 +84,6 @@ jobs:
           ./autogen.sh
           ./configure --host=aarch64-linux-android --disable-shared
           make -j4
-          make check
         env:
           AR: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           RANLIB: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
