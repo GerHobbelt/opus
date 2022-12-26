@@ -22,7 +22,8 @@ jobs:
         run: |
           ./autogen.sh
           ./configure --disable-shared
-          make
+          make -j4
+          make check
 
       - name: Prepare output
         run: |
@@ -53,7 +54,8 @@ jobs:
         run: |
           ./autogen.sh
           ./configure --disable-shared
-          make
+          make -j4
+          make check
 
       - name: Prepare output
         run: |
@@ -81,7 +83,8 @@ jobs:
           ln -sf $ANDROID_NDK_ROOT $ANDROID_SDK_ROOT/ndk-bundle
           ./autogen.sh
           ./configure --host=aarch64-linux-android --disable-shared
-          make
+          make -j4
+          make check
         env:
           AR: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           RANLIB: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
