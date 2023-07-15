@@ -104,10 +104,10 @@ jobs:
           ./configure --host=arm-unknown-linux-gnueabihf --disable-shared
           make -j4
         env:
-          AR: ${{ env.HOME }}/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ar
-          RANLIB: ${{ env.HOME }}/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ranlib
-          LD: ${{ env.HOME }}/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-gcc
-          CC: ${{ env.HOME }}/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-gcc
+          AR: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ar
+          RANLIB: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ranlib
+          LD: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-gcc
+          CC: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-gcc
 
       - name: Rename build output
         run: mv .libs/libopus.a ./libopus-android30.a
