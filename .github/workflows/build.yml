@@ -70,15 +70,20 @@ jobs:
           name: build-output-macos-arm64
           path: libopus-macos-arm64.a
 
-  build-android:
-    runs-on: ubuntu-20.04
+  build-android-and-rpi:
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           persist-credentials: false
 
-      - name: Configure and make
+      - name: Get RPi toolchain
+        run: |
+          wget https://github.com/sfjohnson/rpi-toolchain/releases/download/v0.0.6/arm-rpi-linux-gnueabihf.tar.xz
+          tar xf arm-rpi-linux-gnueabihf.tar.xz -C ~
+
+      - name: Configure and make Android
         run: |
           ln -sf $ANDROID_NDK_ROOT $ANDROID_SDK_ROOT/ndk-bundle
           ./autogen.sh
@@ -93,25 +98,41 @@ jobs:
       - name: Rename build output
         run: mv .libs/libopus.a ./libopus-android30.a
 
+      - name: Configure and make RPi
+        run: |
+          make clean
+          ./configure --host=arm-unknown-linux-gnueabihf --disable-shared
+          make -j4
+        env:
+          AR: ${{ env.HOME }}/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ar
+          RANLIB: ${{ env.HOME }}/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ranlib
+          LD: ${{ env.HOME }}/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-gcc
+          CC: ${{ env.HOME }}/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-gcc
+
+      - name: Rename build output
+        run: mv .libs/libopus.a ./libopus-android30.a
+
       - name: Upload build output
         uses: actions/upload-artifact@v2
         with:
-          name: build-output-android30
-          path: libopus-android30.a
+          name: build-output-android30-and-rpi
+          path: |
+            libopus-android30.a
+            libopus-rpi.a
 
   create-release:
-    runs-on: ubuntu-20.04
-    needs: [build-macos, build-android, build-macos-arm64]
+    runs-on: ubuntu-22.04
+    needs: [build-macos, build-android-and-rpi, build-macos-arm64]
     steps:
       - name: Get build output macos11
         uses: actions/download-artifact@v2
         with:
           name: build-output-macos11
 
-      - name: Get build output android30
+      - name: Get build output android30 and rpi
         uses: actions/download-artifact@v2
         with:
-          name: build-output-android30
+          name: build-output-android30-and-rpi
 
       - name: Get build output macos-arm64
         uses: actions/download-artifact@v2
@@ -126,6 +147,7 @@ jobs:
             libopus-macos11.a
             libopus-android30.a
             libopus-macos-arm64.a
+            libopus-rpi.a
             LICENSE
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
