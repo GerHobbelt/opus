@@ -89,6 +89,7 @@ jobs:
           ./autogen.sh
           ./configure --host=aarch64-linux-android --disable-shared
           make -j4
+          make check
         env:
           AR: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           RANLIB: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
@@ -103,6 +104,7 @@ jobs:
           make clean
           ./configure --host=arm-unknown-linux-gnueabihf --disable-shared
           make -j4
+          make check
         env:
           AR: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ar
           RANLIB: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ranlib
@@ -110,7 +112,7 @@ jobs:
           CC: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-gcc
 
       - name: Rename build output
-        run: mv .libs/libopus.a ./libopus-android30.a
+        run: mv .libs/libopus.a ./libopus-rpi.a
 
       - name: Upload build output
         uses: actions/upload-artifact@v2
