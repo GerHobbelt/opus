@@ -70,7 +70,7 @@ jobs:
           name: build-output-macos-arm64
           path: libopus-macos-arm64.a
 
-  build-android-and-rpi:
+  build-linux:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -83,56 +83,61 @@ jobs:
           wget https://github.com/sfjohnson/rpi-toolchain/releases/download/v0.0.6/arm-rpi-linux-gnueabihf.tar.xz
           tar xf arm-rpi-linux-gnueabihf.tar.xz -C ~
 
+      - name: Configure and make linux-x64
+        run: |
+          ./autogen.sh
+          ./configure --disable-shared
+          make -j4
+          make check
+          mv .libs/libopus.a ./libopus-linux-x64.a
+
       - name: Configure and make Android
         run: |
           ln -sf $ANDROID_NDK_ROOT $ANDROID_SDK_ROOT/ndk-bundle
-          ./autogen.sh
+          make clean
           ./configure --host=aarch64-linux-android --disable-shared
           make -j4
+          mv .libs/libopus.a ./libopus-android30.a
         env:
           AR: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           RANLIB: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ranlib
           LD: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang
           CC: /usr/local/lib/android/sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang
 
-      - name: Rename build output
-        run: mv .libs/libopus.a ./libopus-android30.a
-
       - name: Configure and make RPi
         run: |
           make clean
           ./configure --host=arm-unknown-linux-gnueabihf --disable-shared
           make -j4
+          mv .libs/libopus.a ./libopus-rpi.a
         env:
           AR: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ar
           RANLIB: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-ranlib
           LD: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-gcc
           CC: /home/runner/arm-rpi-linux-gnueabihf/bin/arm-rpi-linux-gnueabihf-gcc
 
-      - name: Rename build output
-        run: mv .libs/libopus.a ./libopus-rpi.a
-
       - name: Upload build output
         uses: actions/upload-artifact@v2
         with:
-          name: build-output-android30-and-rpi
+          name: build-output-linux
           path: |
             libopus-android30.a
             libopus-rpi.a
+            libopus-linux-x64.a
 
   create-release:
     runs-on: ubuntu-22.04
-    needs: [build-macos, build-android-and-rpi, build-macos-arm64]
+    needs: [build-macos, build-linux, build-macos-arm64]
     steps:
       - name: Get build output macos11
         uses: actions/download-artifact@v2
         with:
           name: build-output-macos11
 
-      - name: Get build output android30 and rpi
+      - name: Get build output linux
         uses: actions/download-artifact@v2
         with:
-          name: build-output-android30-and-rpi
+          name: build-output-linux
 
       - name: Get build output macos-arm64
         uses: actions/download-artifact@v2
@@ -148,6 +153,7 @@ jobs:
             libopus-android30.a
             libopus-macos-arm64.a
             libopus-rpi.a
+            libopus-linux-x64.a
             LICENSE
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
