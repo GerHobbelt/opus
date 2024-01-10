@@ -52,6 +52,7 @@ jobs:
 
       - name: Configure and make
         run: |
+          brew install automake
           ./autogen.sh
           ./configure --disable-shared
           make -j4
